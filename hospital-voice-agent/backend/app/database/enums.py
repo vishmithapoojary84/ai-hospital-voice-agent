@@ -12,7 +12,7 @@ class Specialty(str, Enum):
 
 
 class AppointmentStatus(str, Enum):
-    BOOKED = "Booked"
+    SCHEDULED = "Scheduled"
     CANCELLED = "Cancelled"
     COMPLETED = "Completed"
 

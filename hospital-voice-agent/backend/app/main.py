@@ -1,11 +1,21 @@
 from fastapi import FastAPI
+from app.database.database import Base, engine
+import app.database
+from app.api.routes import router
+
+
 
 app = FastAPI(
-    title="Hospital Voice Agent API",
-    description="Backend API for Hospital Voice Agent",
-    version="0.1.0"
+    title="AI Hospital Voice Agent",
 )
 
+Base.metadata.create_all(bind=engine)
+
+app.include_router(router)
+
+
 @app.get("/")
-def read_root():
-    return {"message": "Welcome to the Hospital Voice Agent API"}
+def root():
+    return {
+        "message": "Hospital Voice Agent API Running"
+    }

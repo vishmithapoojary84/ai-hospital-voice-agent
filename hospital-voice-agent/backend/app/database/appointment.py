@@ -53,7 +53,7 @@ class Appointment(Base):
     status = Column(
         Enum(AppointmentStatus),
         nullable=False,
-        default=AppointmentStatus.BOOKED,
+        default=AppointmentStatus.SCHEDULED,
     )
 
     created_at = Column(

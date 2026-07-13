@@ -1,0 +1,94 @@
+.assistant{
+width:480px;
+padding:48px;
+border-radius:24px;
+background:white;
+box-shadow: 0 20px 80px rgba(15,23,42,.08);
+text-align:center;
+}
+
+.avatar{
+width:140px;
+height:140px;
+margin:auto;
+border-radius:50%;
+display:flex;
+justify-content:center;
+align-items:center;
+background:rgba(37,99,235,.08);
+margin-bottom: 24px;
+}
+
+.avatar-core{
+width:70px;
+height:70px;
+border-radius:50%;
+background:linear-gradient(135deg, #2563eb, #60a5fa);
+}
+
+.avatar.listening .avatar-core{
+animation:listening 1.8s infinite;
+}
+
+.avatar.speaking .avatar-core{
+animation:speaking .8s infinite;
+}
+
+.bars{
+height:90px;
+margin-top:20px;
+}
+
+button{
+border-radius:12px;
+}
+
+.start-btn{
+padding:18px 35px;
+font-size:18px;
+font-weight: 500;
+background:#2563EB;
+color:white;
+border:none;
+cursor:pointer;
+transition: background-color 0.2s;
+margin-top: 24px;
+}
+
+.start-btn:hover {
+  background:#1d4ed8;
+}
+
+.status {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: #64748B;
+    margin: 10px 0;
+}
+
+@keyframes listening{
+0%{
+transform:scale(1);
+box-shadow:0 0 0 rgba(37,99,235,.5);
+}
+50%{
+transform:scale(1.15);
+box-shadow:0 0 40px rgba(37,99,235,.45);
+}
+100%{
+transform:scale(1);
+box-shadow:0 0 0 rgba(37,99,235,.5);
+}
+}
+
+@keyframes speaking{
+0%{
+transform:scale(1);
+}
+50%{
+transform:scale(1.25);
+}
+100%{
+transform:scale(1);
+}
+}

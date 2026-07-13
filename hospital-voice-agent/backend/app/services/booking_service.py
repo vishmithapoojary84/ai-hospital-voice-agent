@@ -21,6 +21,33 @@ def create_appointment(
     appointment_date: date,
     appointment_time: time,
 ):
+    existing_appointment = (
+        db.query(Appointment)
+        .filter(
+            Appointment.doctor_id == doctor_id,
+            Appointment.appointment_date == appointment_date,
+            Appointment.appointment_time == appointment_time,
+        )
+        .first()
+    )
+
+    if existing_appointment:
+        if existing_appointment.status == AppointmentStatus.CANCELLED:
+            existing_appointment.patient_id = patient_id
+            existing_appointment.status = AppointmentStatus.SCHEDULED
+            try:
+                db.commit()
+                db.refresh(existing_appointment)
+                return existing_appointment
+            except Exception:
+                db.rollback()
+                raise
+        else:
+            raise HTTPException(
+                status_code=400,
+                detail="Slot already booked.",
+            )
+
     appointment = Appointment(
         patient_id=patient_id,
         doctor_id=doctor_id,

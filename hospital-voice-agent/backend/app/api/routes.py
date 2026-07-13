@@ -1,7 +1,9 @@
 from datetime import date
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
+from livekit.api import AccessToken, VideoGrants
+from app.config import settings
 
 from app.database.database import get_db
 from app.database.enums import Specialty
@@ -129,3 +131,55 @@ def appointment_history(
         phone=phone,
         status=status,
     )
+
+
+from fastapi import BackgroundTasks
+from livekit import api
+
+async def dispatch_agent(room: str, language: str):
+    lk = api.LiveKitAPI(settings.LIVEKIT_URL, settings.LIVEKIT_API_KEY, settings.LIVEKIT_API_SECRET)
+    try:
+        await lk.room.update_room_metadata(
+            api.UpdateRoomMetadataRequest(room=room, metadata=language)
+        )
+        
+        req = api.CreateAgentDispatchRequest(
+            agent_name="hospital-agent",
+            room=room
+        )
+        await lk.agent_dispatch.create_dispatch(req)
+    except Exception as e:
+        print(f"Failed to dispatch agent: {e}")
+    finally:
+        await lk.aclose()
+
+@router.get("/token")
+async def get_token(
+    background_tasks: BackgroundTasks,
+    identity: str = Query(...),
+    room: str = Query(...),
+    language: str = Query("english"),
+):
+    token = (
+        AccessToken(
+            settings.LIVEKIT_API_KEY,
+            settings.LIVEKIT_API_SECRET,
+        )
+        .with_identity(identity)
+        .with_name(identity)
+        .with_grants(
+            VideoGrants(
+                room_join=True,
+                room=room,
+            )
+        )
+        .to_jwt()
+    )
+
+    # Automatically dispatch the agent to this room
+    background_tasks.add_task(dispatch_agent, room, language)
+
+    return {
+        "token": token,
+        "url": settings.LIVEKIT_URL,
+    }

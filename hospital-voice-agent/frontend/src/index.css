@@ -1,0 +1,10 @@
+body{
+margin:0;
+font-family:"Inter",sans-serif;
+background:#F8FAFC;
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+color: #0F172A;
+}

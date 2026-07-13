@@ -1,0 +1,7 @@
+google-genai
+python-dotenv
+requests
+livekit-agents
+livekit-plugins-deepgram
+livekit-plugins-google
+livekit-plugins-elevenlabs

@@ -13,7 +13,7 @@ export default function VoiceAssistant() {
 
   const joinRoom = async () => {
     const res = await fetch(
-      `http://localhost:8000/token?identity=Patient&room=hospital&language=${language}`
+      `${import.meta.env.VITE_BACKEND_URL}/token?identity=Patient&room=hospital&language=${language}`
     );
 
     const data = await res.json();

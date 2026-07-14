@@ -136,7 +136,14 @@ def appointment_history(
 from fastapi import BackgroundTasks
 from livekit import api
 
-async def dispatch_agent(room: str, language: str):
+import json
+
+async def dispatch_agent(
+    room: str,
+    language: str,
+    stt_provider: str,
+    llm_provider: str,
+):
     lk = api.LiveKitAPI(
         settings.LIVEKIT_URL,
         settings.LIVEKIT_API_KEY,
@@ -145,10 +152,18 @@ async def dispatch_agent(room: str, language: str):
 
     try:
         try:
+            metadata = json.dumps(
+                {
+                    "language": language,
+                    "stt_provider": stt_provider,
+                    "llm_provider": llm_provider,
+                }
+            )
+
             await lk.room.create_room(
                 api.CreateRoomRequest(
                     name=room,
-                    metadata=language,
+                    metadata=metadata,
                     empty_timeout=600,
                 )
             )
@@ -173,6 +188,8 @@ async def get_token(
     identity: str = Query(...),
     room: str = Query(...),
     language: str = Query("english"),
+    stt_provider: str = Query("deepgram"),
+    llm_provider: str = Query("gemini"),
 ):
     token = (
         AccessToken(
@@ -191,7 +208,13 @@ async def get_token(
     )
 
     # Automatically dispatch the agent to this room
-    background_tasks.add_task(dispatch_agent, room, language)
+    background_tasks.add_task(
+        dispatch_agent,
+        room,
+        language,
+        stt_provider,
+        llm_provider,
+    )
 
     return {
         "token": token,

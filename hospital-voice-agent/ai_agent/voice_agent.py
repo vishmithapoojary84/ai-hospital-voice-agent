@@ -98,7 +98,18 @@ Timezone: Asia/Kolkata
     print("SESSION STARTED")
 
     # Read language from room metadata (sent by backend during dispatch)
-    language = ctx.room.metadata or "english"
+    import json
+    
+    metadata = json.loads(ctx.room.metadata or "{}")
+
+    language = metadata.get("language", "english")
+    stt_provider = metadata.get("stt_provider", "deepgram")
+    llm_provider = metadata.get("llm_provider", "gemini")
+
+    print("Language:", language)
+    print("STT:", stt_provider)
+    print("LLM:", llm_provider)
+
     language = language.lower()
     
     if language == "hindi":

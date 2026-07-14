@@ -10,10 +10,12 @@ export default function VoiceAssistant() {
   const [token, setToken] = useState("");
   const [serverUrl, setServerUrl] = useState("");
   const [language, setLanguage] = useState("english");
+  const [sttProvider, setSttProvider] = useState("deepgram");
+  const [llmProvider, setLlmProvider] = useState("gemini");
 
   const joinRoom = async () => {
     const res = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/token?identity=Patient&room=hospital&language=${language}`
+      `${import.meta.env.VITE_BACKEND_URL}/token?identity=Patient&room=hospital&language=${language}&stt_provider=${sttProvider}&llm_provider=${llmProvider}`
     );
 
     const data = await res.json();
@@ -45,6 +47,62 @@ export default function VoiceAssistant() {
           >
             <option value="english">English</option>
             <option value="hindi">Hindi (हिंदी)</option>
+          </select>
+        </div>
+
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: "10px",
+            marginBottom: "20px",
+          }}
+        >
+          <label style={{ color: "#64748B", fontWeight: "500" }}>
+            Speech-to-Text Provider
+          </label>
+
+          <select
+            value={sttProvider}
+            onChange={(e) => setSttProvider(e.target.value)}
+            style={{
+              padding: "10px 20px",
+              borderRadius: "8px",
+              fontSize: "1rem",
+            }}
+          >
+            <option value="deepgram">Deepgram</option>
+            <option value="elevenlabs">ElevenLabs</option>
+            <option value="sarvam">Sarvam AI</option>
+          </select>
+        </div>
+
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: "10px",
+            marginBottom: "32px",
+          }}
+        >
+          <label style={{ color: "#64748B", fontWeight: "500" }}>
+            AI Model
+          </label>
+
+          <select
+            value={llmProvider}
+            onChange={(e) => setLlmProvider(e.target.value)}
+            style={{
+              padding: "10px 20px",
+              borderRadius: "8px",
+              fontSize: "1rem",
+            }}
+          >
+            <option value="gemini">Gemini 2.5 Flash Lite</option>
+            <option value="gpt">GPT-4.1</option>
+            <option value="claude">Claude Sonnet</option>
           </select>
         </div>
 

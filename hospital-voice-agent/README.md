@@ -1,93 +1,240 @@
-# Hospital Voice Agent
+# AI Hospital Voice Receptionist
 
-A modern voice agent application designed for hospitals, facilitating appointment bookings, checking availability, and managing doctor interactions.
+An AI-powered voice receptionist that allows patients to book, reschedule, cancel appointments, and view appointment history using natural voice conversations.
 
-## Project Structure
+The application provides a phone-call-like experience by combining speech recognition, large language models, text-to-speech, and backend appointment management.
 
-```text
-hospital-voice-agent/
-│
-├── backend/                  # FastAPI & Python AI Agent
-│   ├── .venv/                # Python Virtual Environment
-│   ├── app/
-│   │   ├── agent/            # Agent logic, tools, and prompts
-│   │   │   ├── voice_agent.py
-│   │   │   ├── prompt.py
-│   │   │   └── tools.py
-│   │   ├── api/              # API endpoints and routers
-│   │   │   └── routes.py
-│   │   ├── database/         # Database models, schemas, and connection setup
-│   │   │   ├── database.py
-│   │   │   ├── models.py
-│   │   │   └── schemas.py
-│   │   ├── services/         # Business logic services
-│   │   │   ├── booking_service.py
-│   │   │   ├── availability_service.py
-│   │   │   └── doctor_service.py
-│   │   ├── utils/            # Helper utilities
-│   │   │   └── helpers.py
-│   │   ├── config.py         # Application configuration
-│   │   └── main.py           # FastAPI entrypoint
-│   ├── .env                  # Backend environment configurations (git-ignored)
-│   └── requirements.txt      # Python dependencies list
-│
-├── frontend/                 # React & Vite frontend application
-│   ├── public/               # Public assets
-│   ├── src/
-│   │   ├── components/       # Reusable UI components
-│   │   ├── pages/            # Page layouts and views
-│   │   ├── hooks/            # Custom React hooks
-│   │   ├── services/         # Frontend API services
-│   │   ├── App.jsx           # Main App component
-│   │   └── main.jsx          # Frontend entrypoint
-│   ├── package.json          # Node dependencies and scripts
-│   └── vite.config.js        # Vite bundler config
-│
-└── .gitignore                # Project-wide gitignore config
-```
+---
+
+## Features
+
+- Voice-based appointment booking
+- Appointment rescheduling
+- Appointment cancellation
+- Appointment history retrieval
+- Doctor availability checking
+- English and Hindi conversation support
+- Natural voice interaction
+- AI-powered conversation handling
+
+---
 
 ## Tech Stack
 
-* **Backend**: Python 3.12, FastAPI, SQLAlchemy, `uv` package manager.
-* **AI Engine**: Google Gemini API via `google-genai` package.
-* **Frontend**: React, Vite, Vanilla CSS.
+### Frontend
+- React
+- Vite
+- Tailwind CSS
 
-## Getting Started
+### Backend
+- FastAPI
+- PostgreSQL
 
-### Backend Setup
+### AI & Voice Services
+- LiveKit
+- Deepgram (Speech-to-Text)
+- Google Gemini
+- ElevenLabs (Text-to-Speech)
+- Silero Voice Activity Detection (VAD)
 
-1. Make sure you have `uv` installed. If not, install it using:
-   ```bash
-   curl -LsSf https://astral.sh/uv/install.sh | sh
-   ```
-2. Navigate to the backend directory:
-   ```bash
-   cd backend
-   ```
-3. Initialize the environment and install dependencies:
-   ```bash
-   uv sync
-   ```
-4. Copy the environment variables and set your Gemini API key:
-   ```bash
-   cp .env.example .env  # configure keys
-   ```
-5. Run the FastAPI development server:
-   ```bash
-   uv run uvicorn app.main:app --reload
-   ```
+---
 
-### Frontend Setup
+## Project Architecture
 
-1. Navigate to the frontend directory:
-   ```bash
-   cd frontend
-   ```
-2. Install npm dependencies:
-   ```bash
-   npm install
-   ```
-3. Run the Vite development server:
-   ```bash
-   npm run dev
-   ```
+```
+Patient
+    │
+    ▼
+React Frontend
+    │
+    ▼
+LiveKit
+    │
+    ▼
+Deepgram STT
+    │
+    ▼
+Google Gemini LLM
+    │
+    ▼
+Function Calling
+    │
+    ├── Check Doctor Availability
+    ├── Book Appointment
+    ├── Reschedule Appointment
+    ├── Cancel Appointment
+    └── Appointment History
+    │
+    ▼
+FastAPI Backend
+    │
+    ▼
+PostgreSQL Database
+    │
+    ▼
+ElevenLabs TTS
+    │
+    ▼
+Voice Response
+```
+
+---
+
+## Project Structure
+
+```
+ai-hospital-voice-agent/
+
+├── frontend/
+│   ├── src/
+│   ├── public/
+│   └── package.json
+│
+├── backend/
+│   ├── app/
+│   ├── routes/
+│   ├── database/
+│   └── main.py
+│
+├── ai_agent/
+│   ├── voice_agent.py
+│   ├── tools.py
+│   ├── prompts.py
+│   ├── config.py
+│   └── logger.py
+│
+└── README.md
+```
+
+---
+
+## Installation
+
+### Clone Repository
+
+```bash
+git clone https://github.com/vishmithapoojary84/ai-hospital-voice-agent.git
+
+cd ai-hospital-voice-agent
+```
+
+---
+
+## Backend Setup
+
+```bash
+cd backend
+
+python -m venv .venv
+
+source .venv/bin/activate
+
+pip install -r requirements.txt
+
+uvicorn main:app --reload
+```
+
+---
+
+## Frontend Setup
+
+```bash
+cd frontend
+
+npm install
+
+npm run dev
+```
+
+---
+
+## AI Agent Setup
+
+```bash
+cd ai_agent
+
+python -m venv .venv
+
+source .venv/bin/activate
+
+pip install -r requirements.txt
+
+python voice_agent.py dev
+```
+
+---
+
+## Environment Variables
+
+Create a `.env` file inside the AI Agent directory.
+
+```env
+GEMINI_API_KEY=
+
+GEMINI_MODEL=
+
+LIVEKIT_URL=
+
+LIVEKIT_API_KEY=
+
+LIVEKIT_API_SECRET=
+
+DEEPGRAM_API_KEY=
+
+ELEVEN_API_KEY=
+
+BACKEND_URL=
+```
+
+---
+
+## Demo
+
+The project demonstrates:
+
+- Voice appointment booking
+- Doctor selection
+- Appointment rescheduling
+- Appointment cancellation
+- Appointment history
+- English and Hindi conversations
+- Natural AI voice responses
+
+---
+
+## Deployment
+
+### Frontend
+
+https://ai-hospital-voice-agent-1.onrender.com/
+
+### Backend
+
+https://ai-hospital-voice-agent.onrender.com
+
+---
+
+## GitHub Repository
+
+https://github.com/vishmithapoojary84/ai-hospital-voice-agent
+
+---
+
+## Future Improvements
+
+- Patient authentication
+- Multiple hospital support
+- Doctor dashboard
+- SMS/Email appointment reminders
+- Calendar integration
+- Medical record integration
+
+---
+
+## Author
+
+**Vishmitha Poojary**
+
+
+
+AI | Backend | Full Stack Development

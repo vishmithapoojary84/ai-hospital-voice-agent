@@ -100,7 +100,7 @@ export default function VoiceAssistant() {
               fontSize: "1rem",
             }}
           >
-            <option value="gemini">Gemini 2.5 Flash Lite</option>
+            <option value="gemini">Gemini 3.1 Flash Lite</option>
             <option value="gpt">GPT-4.1</option>
             <option value="claude">Claude Sonnet</option>
           </select>

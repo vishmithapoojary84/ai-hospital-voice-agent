@@ -1,0 +1,3 @@
+{
+    "python.defaultInterpreterPath": "${workspaceFolder}/hospital-voice-agent/ai_agent/.venv/bin/python"
+}

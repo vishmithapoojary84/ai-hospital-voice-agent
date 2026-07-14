@@ -137,22 +137,36 @@ from fastapi import BackgroundTasks
 from livekit import api
 
 async def dispatch_agent(room: str, language: str):
-    lk = api.LiveKitAPI(settings.LIVEKIT_URL, settings.LIVEKIT_API_KEY, settings.LIVEKIT_API_SECRET)
+    lk = api.LiveKitAPI(
+        settings.LIVEKIT_URL,
+        settings.LIVEKIT_API_KEY,
+        settings.LIVEKIT_API_SECRET,
+    )
+
     try:
-        await lk.room.update_room_metadata(
-            api.UpdateRoomMetadataRequest(room=room, metadata=language)
+        try:
+            await lk.room.create_room(
+                api.CreateRoomRequest(
+                    name=room,
+                    metadata=language,
+                    empty_timeout=600,
+                )
+            )
+            print("Room created")
+        except Exception as e:
+            print("Room already exists:", e)
+
+        await lk.agent_dispatch.create_dispatch(
+            api.CreateAgentDispatchRequest(
+                agent_name="hospital-agent",
+                room=room,
+            )
         )
-        
-        req = api.CreateAgentDispatchRequest(
-            agent_name="hospital-agent",
-            room=room
-        )
-        await lk.agent_dispatch.create_dispatch(req)
-    except Exception as e:
-        print(f"Failed to dispatch agent: {e}")
+
+        print("Agent dispatched!")
+
     finally:
         await lk.aclose()
-
 @router.get("/token")
 async def get_token(
     background_tasks: BackgroundTasks,

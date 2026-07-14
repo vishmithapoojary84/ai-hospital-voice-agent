@@ -13,3 +13,5 @@ LIVEKIT_API_KEY = os.getenv("LIVEKIT_API_KEY", "")
 LIVEKIT_API_SECRET = os.getenv("LIVEKIT_API_SECRET", "")
 
 DEEPGRAM_API_KEY = os.getenv("DEEPGRAM_API_KEY", "")
+
+ELEVEN_API_KEY=os.getenv("ELEVEN_API_KEY","")

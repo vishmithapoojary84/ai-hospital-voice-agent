@@ -101,7 +101,7 @@ async def hospital_agent(ctx: JobContext):
     tts = elevenlabs.TTS(
         api_key=ELEVEN_API_KEY,
         voice_id="EXAVITQu4vr4xnSDxMaL",
-        model="eleven_multilingual_v2",
+        model="eleven_turbo_v2_5",
     )
 
     session = AgentSession(

@@ -47,23 +47,67 @@ async def hospital_agent(ctx: JobContext):
     await ctx.connect()
     print("STEP 2")
     print("STEP 3")
-    session = AgentSession(
-        stt=deepgram.STT(
+    
+    import json
+    metadata = json.loads(ctx.room.metadata or "{}")
+
+    language = metadata.get("language", "english")
+    stt_provider = metadata.get("stt_provider", "deepgram")
+    llm_provider = metadata.get("llm_provider", "gemini")
+
+    print("Language:", language)
+    print("STT:", stt_provider)
+    print("LLM:", llm_provider)
+
+    # -----------------------------
+    # Speech-to-Text Provider
+    # -----------------------------
+    if stt_provider == "elevenlabs":
+        print("Using ElevenLabs STT")
+        stt = elevenlabs.STT(api_key=ELEVEN_API_KEY)
+    elif stt_provider == "sarvam":
+        print("Sarvam not configured. Falling back to Deepgram.")
+        stt = deepgram.STT(
             model="nova-3",
             language="multi",
             smart_format=True,
             punctuate=True,
-        ),
-        llm=google.LLM(
-            model=MODEL,
-            api_key=GEMINI_API_KEY,
-        ),
-        tts=elevenlabs.TTS(
-            api_key=ELEVEN_API_KEY,
-            voice_id="EXAVITQu4vr4xnSDxMaL",
-            model="eleven_multilingual_v2",
-        ),
-        
+        )
+    else:
+        print("Using Deepgram STT")
+        stt = deepgram.STT(
+            model="nova-3",
+            language="multi",
+            smart_format=True,
+            punctuate=True,
+        )
+
+    # -----------------------------
+    # LLM Provider
+    # -----------------------------
+    if llm_provider == "gpt":
+        print("GPT selected but not configured. Falling back to Gemini.")
+    elif llm_provider == "claude":
+        print("Claude selected but not configured. Falling back to Gemini.")
+
+    llm = google.LLM(
+        model=MODEL,
+        api_key=GEMINI_API_KEY,
+    )
+
+    # -----------------------------
+    # TTS Provider
+    # -----------------------------
+    tts = elevenlabs.TTS(
+        api_key=ELEVEN_API_KEY,
+        voice_id="EXAVITQu4vr4xnSDxMaL",
+        model="eleven_multilingual_v2",
+    )
+
+    session = AgentSession(
+        stt=stt,
+        llm=llm,
+        tts=tts,
         vad=silero.VAD.load(min_silence_duration=0.3),
     )
     print("STEP 4")
@@ -97,18 +141,7 @@ Timezone: Asia/Kolkata
     )
     print("SESSION STARTED")
 
-    # Read language from room metadata (sent by backend during dispatch)
-    import json
-    
-    metadata = json.loads(ctx.room.metadata or "{}")
-
-    language = metadata.get("language", "english")
-    stt_provider = metadata.get("stt_provider", "deepgram")
-    llm_provider = metadata.get("llm_provider", "gemini")
-
-    print("Language:", language)
-    print("STT:", stt_provider)
-    print("LLM:", llm_provider)
+    # Removed redundant metadata read (moved up)
 
     language = language.lower()
     

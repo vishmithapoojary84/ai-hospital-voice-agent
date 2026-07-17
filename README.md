@@ -168,8 +168,7 @@ ai-hospital-voice-agent/
 
 The application is designed to be easily deployed to modern cloud platforms:
 
-- **Frontend:** [https://ai-hospital-voice-agent-1.onrender.com/](https://ai-hospital-voice-agent-1.onrender.com/)
-- **Backend:** [https://ai-hospital-voice-agent.onrender.com](https://ai-hospital-voice-agent.onrender.com)
+
 - **AI Agent:** Can be deployed to a standard VPS or containerized platform.
 
 ## Future Enhancements

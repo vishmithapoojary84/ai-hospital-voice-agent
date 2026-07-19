@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import {
   VoiceAssistantControlBar,
   BarVisualizer,
@@ -6,22 +5,9 @@ import {
 } from "@livekit/components-react";
 
 import Avatar from "./Avatar";
-import { stopRingtone } from "../utils/ringtone";
 
 export default function AssistantUI() {
     const { state, audioTrack } = useVoiceAssistant();
-
-    // Stop ringtone as soon as agent starts speaking
-    useEffect(() => {
-        if (state === "speaking") {
-            stopRingtone();
-        }
-    }, [state]);
-
-    // Cleanup on unmount
-    useEffect(() => {
-        return () => stopRingtone();
-    }, []);
 
     let statusText = "";
     let statusDot = "";

@@ -5,7 +5,6 @@ import {
   LiveKitRoom,
 } from "@livekit/components-react";
 import AssistantUI from "./AssistantUI";
-import { startRingtone, stopRingtone } from "../utils/ringtone";
 
 export default function VoiceAssistant() {
   const [token, setToken] = useState("");
@@ -18,8 +17,6 @@ export default function VoiceAssistant() {
 
   const joinRoom = async () => {
     setIsConnecting(true);
-    startRingtone(); // Start playing ringtone while waiting for connection
-    
     try {
       const res = await fetch(
         `${import.meta.env.VITE_BACKEND_URL}/token?identity=Patient&room=hospital&language=${language}&stt_provider=${sttProvider}&tts_provider=${ttsProvider}&llm_provider=${llmProvider}`
@@ -36,7 +33,6 @@ export default function VoiceAssistant() {
     } catch (error) {
       console.error("Error connecting:", error);
       setIsConnecting(false);
-      stopRingtone();
       alert("Failed to connect to the server. Please ensure the backend is running.");
     }
   };
@@ -45,7 +41,6 @@ export default function VoiceAssistant() {
     setToken("");
     setServerUrl("");
     setIsConnecting(false);
-    stopRingtone();
   };
 
   if (!token) {

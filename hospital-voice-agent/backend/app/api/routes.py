@@ -199,6 +199,14 @@ async def get_token(
     llm_provider: str = Query("gemini"),
     tts_provider: str = Query("sarvam"),
 ):
+    import json
+    metadata_json = json.dumps({
+        "language": language,
+        "stt_provider": stt_provider,
+        "llm_provider": llm_provider,
+        "tts_provider": tts_provider,
+    })
+
     token = (
         AccessToken(
             settings.LIVEKIT_API_KEY,
@@ -206,6 +214,7 @@ async def get_token(
         )
         .with_identity(identity)
         .with_name(identity)
+        .with_metadata(metadata_json)
         .with_grants(
             VideoGrants(
                 room_join=True,

@@ -50,9 +50,10 @@ server = AgentServer(num_idle_processes=1)
 async def hospital_agent(ctx: JobContext):
 
     await ctx.connect()
+    participant = await ctx.wait_for_participant()
     
     import json
-    metadata = json.loads(ctx.room.metadata or "{}")
+    metadata = json.loads(participant.metadata or "{}")
 
     language = metadata.get("language", "english")
     stt_provider = metadata.get("stt_provider", "deepgram")
@@ -127,7 +128,7 @@ Timezone: Asia/Kolkata
     if language == "hindi":
         prompt_instruction = "Greet the patient warmly in Hindi. Continue the conversation primarily in Hindi. Use English terms for medical specialties if needed."
     else:
-        prompt_instruction = "Greet the patient warmly in English. If the patient replies in Hindi, continue in Hindi. Otherwise continue in English."
+        prompt_instruction = "Greet the patient warmly in English. You must strictly speak ONLY in English. Do not use any Hindi words."
 
     await session.generate_reply(
         instructions=prompt_instruction

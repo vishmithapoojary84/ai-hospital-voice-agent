@@ -5,6 +5,7 @@ import {
   LiveKitRoom,
 } from "@livekit/components-react";
 import AssistantUI from "./AssistantUI";
+import { startRingtone, stopRingtone } from "../utils/ringtone";
 
 export default function VoiceAssistant() {
   const [token, setToken] = useState("");
@@ -12,21 +13,39 @@ export default function VoiceAssistant() {
   const [language, setLanguage] = useState("english");
   const [sttProvider, setSttProvider] = useState("deepgram");
   const [llmProvider, setLlmProvider] = useState("gemini");
+  const [ttsProvider, setTtsProvider] = useState("sarvam");
+  const [isConnecting, setIsConnecting] = useState(false);
 
   const joinRoom = async () => {
-    const res = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/token?identity=Patient&room=hospital&language=${language}&stt_provider=${sttProvider}&llm_provider=${llmProvider}`
-    );
+    setIsConnecting(true);
+    startRingtone(); // Start playing ringtone while waiting for connection
+    
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/token?identity=Patient&room=hospital&language=${language}&stt_provider=${sttProvider}&tts_provider=${ttsProvider}&llm_provider=${llmProvider}`
+      );
 
-    const data = await res.json();
+      if (!res.ok) {
+        throw new Error("Failed to fetch token");
+      }
 
-    setToken(data.token);
-    setServerUrl(data.url);
+      const data = await res.json();
+
+      setToken(data.token);
+      setServerUrl(data.url);
+    } catch (error) {
+      console.error("Error connecting:", error);
+      setIsConnecting(false);
+      stopRingtone();
+      alert("Failed to connect to the server. Please ensure the backend is running.");
+    }
   };
 
   const handleDisconnect = () => {
     setToken("");
     setServerUrl("");
+    setIsConnecting(false);
+    stopRingtone();
   };
 
   if (!token) {
@@ -43,7 +62,8 @@ export default function VoiceAssistant() {
           <select 
             value={language} 
             onChange={(e) => setLanguage(e.target.value)}
-            style={{ padding: "10px 20px", fontSize: "1rem", borderRadius: "8px", border: "1px solid #E2E8F0", outline: "none", cursor: "pointer" }}
+            disabled={isConnecting}
+            style={{ padding: "10px 20px", fontSize: "1rem", borderRadius: "8px", border: "1px solid #E2E8F0", outline: "none", cursor: "pointer", opacity: isConnecting ? 0.6 : 1 }}
           >
             <option value="english">English</option>
             <option value="hindi">Hindi (हिंदी)</option>
@@ -66,10 +86,12 @@ export default function VoiceAssistant() {
           <select
             value={sttProvider}
             onChange={(e) => setSttProvider(e.target.value)}
+            disabled={isConnecting}
             style={{
               padding: "10px 20px",
               borderRadius: "8px",
               fontSize: "1rem",
+              opacity: isConnecting ? 0.6 : 1
             }}
           >
             <option value="deepgram">Deepgram</option>
@@ -94,10 +116,12 @@ export default function VoiceAssistant() {
           <select
             value={llmProvider}
             onChange={(e) => setLlmProvider(e.target.value)}
+            disabled={isConnecting}
             style={{
               padding: "10px 20px",
               borderRadius: "8px",
               fontSize: "1rem",
+              opacity: isConnecting ? 0.6 : 1
             }}
           >
             <option value="gemini">Gemini 3.1 Flash Lite</option>
@@ -106,8 +130,47 @@ export default function VoiceAssistant() {
           </select>
         </div>
 
-        <button onClick={joinRoom} className="start-btn">
-          🎤 Start Voice Session
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: "10px",
+            marginBottom: "32px",
+          }}
+        >
+          <label
+            style={{
+              color: "#64748B",
+              fontWeight: "500",
+            }}
+          >
+            Text To Speech
+          </label>
+
+          <select
+            value={ttsProvider}
+            onChange={(e) => setTtsProvider(e.target.value)}
+            disabled={isConnecting}
+            style={{
+              padding: "10px 20px",
+              borderRadius: "8px",
+              fontSize: "1rem",
+              opacity: isConnecting ? 0.6 : 1
+            }}
+          >
+            <option value="sarvam">Sarvam AI</option>
+            <option value="elevenlabs">ElevenLabs</option>
+          </select>
+        </div>
+
+        <button 
+          onClick={joinRoom} 
+          className="start-btn"
+          disabled={isConnecting}
+          style={isConnecting ? { opacity: 0.7, cursor: "not-allowed" } : {}}
+        >
+          {isConnecting ? "📞 Calling Reception..." : "🎤 Start Voice Session"}
         </button>
       </div>
     );
@@ -121,7 +184,7 @@ export default function VoiceAssistant() {
       audio
       video={false}
       data-lk-theme="default"
-      onConnected={() => console.log("Connected")}
+      onConnected={() => {}}
       onDisconnected={handleDisconnect}
       onError={(e) => console.error(e)}
     >

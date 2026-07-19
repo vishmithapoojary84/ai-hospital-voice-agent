@@ -8,6 +8,7 @@ from livekit.agents.llm import function_tool
 from livekit.plugins import deepgram, google, elevenlabs
 import livekit.plugins.silero as silero
 
+
 from config import GEMINI_API_KEY, MODEL
 from prompts import SYSTEM_PROMPT
 from tools import (
@@ -19,6 +20,11 @@ from tools import (
 )
 from logger import logger
 from config import ELEVEN_API_KEY
+
+from providers.stt import create_stt
+from providers.llm import create_llm
+from providers.tts import create_tts
+
 # Load environment variables
 load_dotenv()
 
@@ -37,16 +43,13 @@ class HospitalReceptionist(Agent):
         )
 
 
-server = AgentServer()
+server = AgentServer(num_idle_processes=1)
 
 
 @server.rtc_session(agent_name="hospital-agent")
 async def hospital_agent(ctx: JobContext):
 
-    print("STEP 1")
     await ctx.connect()
-    print("STEP 2")
-    print("STEP 3")
     
     import json
     metadata = json.loads(ctx.room.metadata or "{}")
@@ -55,63 +58,39 @@ async def hospital_agent(ctx: JobContext):
     stt_provider = metadata.get("stt_provider", "deepgram")
     llm_provider = metadata.get("llm_provider", "gemini")
 
-    print("Language:", language)
-    print("STT:", stt_provider)
-    print("LLM:", llm_provider)
+
+
+    from languages import LANGUAGES
+    
+    lang_config = LANGUAGES.get(language, LANGUAGES["english"])
+    stt_language_code = lang_config["stt"]
 
     # -----------------------------
     # Speech-to-Text Provider
     # -----------------------------
-    if stt_provider == "elevenlabs":
-        print("Using ElevenLabs STT")
-        stt = elevenlabs.STT(api_key=ELEVEN_API_KEY)
-    elif stt_provider == "sarvam":
-        print("Sarvam not configured. Falling back to Deepgram.")
-        stt = deepgram.STT(
-            model="nova-3",
-            language="multi",
-            smart_format=True,
-            punctuate=True,
-        )
-    else:
-        print("Using Deepgram STT")
-        stt = deepgram.STT(
-            model="nova-3",
-            language="multi",
-            smart_format=True,
-            punctuate=True,
-        )
+    stt = create_stt(stt_provider, stt_language_code)
 
     # -----------------------------
     # LLM Provider
     # -----------------------------
-    if llm_provider == "gpt":
-        print("GPT selected but not configured. Falling back to Gemini.")
-    elif llm_provider == "claude":
-        print("Claude selected but not configured. Falling back to Gemini.")
-
-    llm = google.LLM(
-        model=MODEL,
-        api_key=GEMINI_API_KEY,
-    )
+    llm = create_llm(llm_provider)
 
     # -----------------------------
     # TTS Provider
     # -----------------------------
-    tts = elevenlabs.TTS(
-        api_key=ELEVEN_API_KEY,
-        voice_id="EXAVITQu4vr4xnSDxMaL",
-        model="eleven_turbo_v2_5",
-    )
+    tts_provider = metadata.get("tts_provider", "sarvam")
+    tts_language_code = lang_config.get("tts", "en")
+    tts = create_tts(tts_provider, tts_language_code)
+
+    vad = silero.VAD.load(min_silence_duration=0.3)
 
     session = AgentSession(
         stt=stt,
         llm=llm,
         tts=tts,
-        vad=silero.VAD.load(min_silence_duration=0.3),
+        vad=vad,
     )
-    print("STEP 4")
-    print("SESSION CREATED")
+
 
     @session.on("conversation_item_added")
     def on_conversation_item_added(event: agents.ConversationItemAddedEvent):
@@ -124,6 +103,8 @@ async def hospital_agent(ctx: JobContext):
             elif role == "assistant":
                 logger.info(f"AI: {text}")
 
+
+
     # Build dynamic prompt with current date and time
     now = datetime.now()
     instructions = f"""
@@ -134,12 +115,10 @@ Current time: {now.strftime("%H:%M")}
 Timezone: Asia/Kolkata
 """
 
-    print("STARTING SESSION")
     await session.start(
         agent=HospitalReceptionist(instructions=instructions),
         room=ctx.room,
     )
-    print("SESSION STARTED")
 
     # Removed redundant metadata read (moved up)
 
@@ -150,11 +129,9 @@ Timezone: Asia/Kolkata
     else:
         prompt_instruction = "Greet the patient warmly in English. If the patient replies in Hindi, continue in Hindi. Otherwise continue in English."
 
-    print("GENERATING GREETING")
     await session.generate_reply(
         instructions=prompt_instruction
     )
-    print("GREETING SENT")
 
 
 if __name__ == "__main__":

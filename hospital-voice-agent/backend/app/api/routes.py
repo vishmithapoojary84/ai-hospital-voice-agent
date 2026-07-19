@@ -143,6 +143,7 @@ async def dispatch_agent(
     language: str,
     stt_provider: str,
     llm_provider: str,
+    tts_provider: str,
 ):
     lk = api.LiveKitAPI(
         settings.LIVEKIT_URL,
@@ -156,6 +157,7 @@ async def dispatch_agent(
                 {
                     "language": language,
                     "stt_provider": stt_provider,
+                    "tts_provider": tts_provider,
                     "llm_provider": llm_provider,
                 }
             )
@@ -190,6 +192,7 @@ async def get_token(
     language: str = Query("english"),
     stt_provider: str = Query("deepgram"),
     llm_provider: str = Query("gemini"),
+    tts_provider: str = Query("sarvam"),
 ):
     token = (
         AccessToken(
@@ -214,6 +217,7 @@ async def get_token(
         language,
         stt_provider,
         llm_provider,
+        tts_provider,
     )
 
     return {

@@ -171,7 +171,13 @@ async def dispatch_agent(
             )
             print("Room created")
         except Exception as e:
-            print("Room already exists:", e)
+            print("Room already exists, updating metadata:", e)
+            await lk.room.update_room_metadata(
+                api.UpdateRoomMetadataRequest(
+                    room=room,
+                    metadata=metadata,
+                )
+            )
 
         await lk.agent_dispatch.create_dispatch(
             api.CreateAgentDispatchRequest(

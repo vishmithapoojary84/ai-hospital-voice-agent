@@ -192,7 +192,6 @@ async def dispatch_agent(
         await lk.aclose()
 @router.get("/token")
 async def get_token(
-    background_tasks: BackgroundTasks,
     identity: str = Query(...),
     room: str = Query(...),
     language: str = Query("english"),
@@ -216,9 +215,8 @@ async def get_token(
         .to_jwt()
     )
 
-    # Automatically dispatch the agent to this room
-    background_tasks.add_task(
-        dispatch_agent,
+    # Await dispatch to ensure room metadata is updated BEFORE the user connects
+    await dispatch_agent(
         room,
         language,
         stt_provider,
